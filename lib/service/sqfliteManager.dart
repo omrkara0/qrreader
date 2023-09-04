@@ -3,7 +3,7 @@ import 'package:sqflite/sqflite.dart';
 
 Future<void> insertHistory(HistoryModel historyModel, Database database) async {
   // Get a reference to the database.
-  final db = await database;
+  final db = database;
 
   await db.insert(
     'history',

@@ -9,6 +9,7 @@ import 'package:qrreader/view/historyPage.dart';
 import 'package:qrreader/view/resultPage.dart';
 import 'package:provider/provider.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:in_app_review/in_app_review.dart';
 
 import '../service/addManager.dart';
 
@@ -22,6 +23,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String barcodeScanRes = "";
+  final InAppReview inAppReview = InAppReview.instance;
 
   Future<void> _scan(context, ScanMode scanMode) async {
     barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
@@ -61,6 +63,19 @@ class _HomePageState extends State<HomePage> {
             'QR and Barcode Reader Pro',
             style: kFontPoppins,
           ),
+          actions: [
+            IconButton(
+                onPressed: () async {
+                  if (await inAppReview.isAvailable()) {
+                    inAppReview.requestReview();
+                  }
+                },
+                icon: Icon(
+                  Icons.star_rounded,
+                  size: 35,
+                  color: Colors.yellow,
+                )),
+          ],
         ),
         body: Center(
           child: Column(
