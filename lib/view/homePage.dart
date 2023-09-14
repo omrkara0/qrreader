@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:lottie/lottie.dart';
 import 'package:qrreader/constants.dart';
 import 'package:qrreader/model/historyModel.dart';
 import 'package:qrreader/service/counterProvider.dart';
@@ -63,19 +64,6 @@ class _HomePageState extends State<HomePage> {
             'QR and Barcode Reader Pro',
             style: kFontPoppins,
           ),
-          actions: [
-            IconButton(
-                onPressed: () async {
-                  if (await inAppReview.isAvailable()) {
-                    inAppReview.requestReview();
-                  }
-                },
-                icon: Icon(
-                  Icons.star_rounded,
-                  size: 35,
-                  color: Colors.yellow,
-                )),
-          ],
         ),
         body: Center(
           child: Column(
@@ -85,66 +73,41 @@ class _HomePageState extends State<HomePage> {
                 flex: 2,
               ),
               Expanded(
-                  child: Icon(
-                Icons.qr_code_scanner_rounded,
-                color: Colors.black,
-                size: 250,
-              )),
+                  flex: 5,
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.qr_code_scanner_rounded,
+                      color: Colors.black,
+                      size: 300,
+                    ),
+                    onPressed: () async {
+                      Provider.of<CounterProvider>(context, listen: false)
+                          .increment();
+                      await _scan(context, ScanMode.DEFAULT);
+
+                      counter == 1 && await inAppReview.isAvailable()
+                          ? inAppReview.requestReview()
+                          : null;
+
+                      counter % 2 == 0
+                          ? AdManager().loadInterstitialAd()
+                          : null;
+                      insertHistory(
+                          HistoryModel(
+                              text: barcodeScanRes,
+                              dateTime: dateTime,
+                              hour: hour),
+                          widget.database);
+                    },
+                  )),
               Spacer(
-                flex: 3,
+                flex: 2,
               ),
               Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () async {
-                        Provider.of<CounterProvider>(context, listen: false)
-                            .increment();
-                        await _scan(context, ScanMode.QR);
-
-                        counter % 2 == 0
-                            ? AdManager().loadInterstitialAd()
-                            : null;
-                        insertHistory(
-                            HistoryModel(
-                                text: barcodeScanRes,
-                                dateTime: dateTime,
-                                hour: hour),
-                            widget.database);
-                      },
-                      child: Text(
-                        'Scan QR Code',
-                        style: kFontPoppins,
-                      ),
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    ElevatedButton(
-                      onPressed: () async {
-                        Provider.of<CounterProvider>(context, listen: false)
-                            .increment();
-                        await _scan(context, ScanMode.BARCODE);
-
-                        counter % 2 == 0
-                            ? AdManager().loadInterstitialAd()
-                            : null;
-                        insertHistory(
-                            HistoryModel(
-                                text: barcodeScanRes,
-                                dateTime: dateTime,
-                                hour: hour),
-                            widget.database);
-                      },
-                      child: Text(
-                        'Scan Barcode',
-                        style: kFontPoppins,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+                  flex: 3,
+                  child: Lottie.asset(
+                    "assets/tap.json",
+                  )),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
