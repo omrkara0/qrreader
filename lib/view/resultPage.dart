@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:qrreader/constants.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../service/addManager.dart';
 
@@ -15,6 +17,15 @@ class ResultPage extends StatefulWidget {
 
 class _ResultPageState extends State<ResultPage> {
   BannerAd? bannerAd;
+
+  bool isValidUrl(String url) {
+    try {
+      Uri.parse(url);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 
   @override
   void initState() {
@@ -45,14 +56,68 @@ class _ResultPageState extends State<ResultPage> {
         body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Spacer(),
             Expanded(
+              flex: 3,
               child: Center(
-                child: Text(
+                child: SelectableText(
                   widget.barcodeScanRes,
                   style: kFontPoppins30,
                 ),
               ),
             ),
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                      onPressed: () async {
+                        await Clipboard.setData(
+                            ClipboardData(text: widget.barcodeScanRes));
+
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text("Copied to Clipboard"),
+                        ));
+                      },
+                      child: Row(
+                        children: [
+                          Icon(Icons.copy),
+                          SizedBox(width: 10),
+                          Text("Copy"),
+                        ],
+                      )),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  ElevatedButton(
+                      onPressed: () async {
+                        bool _validURL =
+                            Uri.parse(widget.barcodeScanRes).isAbsolute;
+
+                        if (_validURL) {
+                          if (!await launchUrl(
+                              Uri.parse(widget.barcodeScanRes))) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text("Not a valid URL"),
+                            ));
+                          }
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text("Not a valid URL"),
+                          ));
+                        }
+                      },
+                      child: Row(
+                        children: [
+                          Icon(Icons.language),
+                          SizedBox(width: 10),
+                          Text("Open In Browser"),
+                        ],
+                      )),
+                ],
+              ),
+            ),
+            Spacer(),
             bannerAd != null
                 ? Align(
                     alignment: Alignment.bottomCenter,
